@@ -76,18 +76,16 @@ func (s *ExamService) ProcessTest(xAuthToken string, delaySeconds int, week int,
 	finalAnswers := make(map[string]string)
 	var mu sync.Mutex
 	bankHitCount := 0
-
 	dbHitCount := 0
 
 	for _, q := range paper.List {
-		fingerprint := generateQuestionFingerprint(q)
 		var foundAnswer string
+		fingerprint := generateQuestionFingerprint(q)
 		answer, found := s.answerBankRepo.Query(fingerprint)
 		if found {
 			foundAnswer = answer
 			bankHitCount++
 		} else {
-
 			title := strings.TrimSpace(strings.TrimRight(q.Title, ". "))
 			options := map[string]string{
 				"A": strings.TrimSpace(strings.TrimRight(q.AnswerA, ". ")),
@@ -106,7 +104,6 @@ func (s *ExamService) ProcessTest(xAuthToken string, delaySeconds int, week int,
 						}
 					}
 				}
-
 			} else {
 				correctWord := s.wordRepo.FindWordByMeaning(title)
 				if correctWord != "" {
@@ -120,15 +117,20 @@ func (s *ExamService) ProcessTest(xAuthToken string, delaySeconds int, week int,
 			}
 
 			if foundAnswer != "" {
-				mu.Lock()
-				finalAnswers[q.PaperDetailID] = foundAnswer
-				mu.Unlock()
 				dbHitCount++
-			} else {
-				unsolvedQuestions = append(unsolvedQuestions, q)
 			}
 		}
+
+		if foundAnswer != "" {
+			mu.Lock()
+			finalAnswers[q.PaperDetailID] = foundAnswer
+			mu.Unlock()
+		} else {
+			unsolvedQuestions = append(unsolvedQuestions, q)
+		}
 	}
+
+	// 统计命中情况
 	fmt.Printf("答案银行命中 %d 题，PDF题库命中 %d 题，有 %d 题待AI解决。\n", bankHitCount, dbHitCount, len(unsolvedQuestions))
 
 	aiSolvedCount := 0
