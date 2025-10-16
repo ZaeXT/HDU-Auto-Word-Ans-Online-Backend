@@ -1,0 +1,18 @@
+server:
+  port: ":8080"
+
+hdu_api:
+  base_url: "https://skl.hdu.edu.cn/api"
+  timeout_seconds: 60
+
+deepseek_ai:
+  api_key: "sk-*****" 
+  base_url: "https://api.deepseek.com"
+  timeout_seconds: 120
+
+database:
+  json_path: "./database.json"
+  answer_bank_path: "./answer_bank.json"
+
+cors:
+  allowed_origins: ["http://localhost:5173", "http://127.0.0.1:5173"]
