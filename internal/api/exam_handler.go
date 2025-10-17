@@ -117,8 +117,12 @@ func (h *ExamHandler) LoginAndStartTestHandler(c *gin.Context) {
 		week = fetchedWeek
 		fmt.Printf("自动获取成功，当前周数: %d\n", week)
 	}
+	correctCount := -1
+	if req.CorrectCount != nil {
+		correctCount = *req.CorrectCount
+	}
 
-	result, err := h.examService.ProcessTest(xAuthToken, req.SubmitDelaySeconds, week, req.ExamType, *req.CorrectCount)
+	result, err := h.examService.ProcessTest(xAuthToken, req.SubmitDelaySeconds, week, req.ExamType, correctCount)
 	if err != nil {
 		h.handleProcessTestError(c, err, "处理测试失败 (登录成功后)")
 		return
