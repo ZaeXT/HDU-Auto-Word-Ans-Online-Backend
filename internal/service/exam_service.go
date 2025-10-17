@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -26,6 +28,12 @@ func NewExamService(hduClient *client.HduApiClient, aiService *AIService, wordRe
 		wordRepo:       wordRepo,
 		answerBankRepo: answerBankRepo,
 	}
+}
+
+type answerToModify struct {
+	PaperDetailID string
+	CorrectAnswer string
+	Level         int
 }
 
 func generateQuestionFingerprint(q model.Question) string {
@@ -58,7 +66,7 @@ func isEnglish(s string) bool {
 	return (firstChar >= 'a' && firstChar <= 'z') || (firstChar >= 'A' && firstChar <= 'Z')
 }
 
-func (s *ExamService) ProcessTest(xAuthToken string, delaySeconds int, week int, examType int) (string, error) {
+func (s *ExamService) ProcessTest(xAuthToken string, delaySeconds int, week int, examType int, correctCount int) (string, error) {
 	startTime := time.Now()
 	fmt.Println("开始处理新的测试请求...")
 
@@ -163,6 +171,57 @@ func (s *ExamService) ProcessTest(xAuthToken string, delaySeconds int, week int,
 			aiSolvedCount = len(aiAnswers)
 			fmt.Printf("AI成功返回 %d 个答案，已合并。\n", len(aiAnswers))
 		}
+	}
+
+	totalQuestions := len(paper.List)
+
+	if correctCount < 0 || correctCount > totalQuestions {
+		correctCount = totalQuestions
+	}
+
+	numToMakeIncorrect := totalQuestions - correctCount
+	if numToMakeIncorrect > 0 {
+		log.Printf("[CorrectnessControl] 目标正确题数: %d/%d。需要故意改错 %d 题。", correctCount, totalQuestions, numToMakeIncorrect)
+
+		var candidates []answerToModify
+		for _, q := range paper.List {
+			if answer, ok := finalAnswers[q.PaperDetailID]; ok {
+				candidates = append(candidates, answerToModify{
+					PaperDetailID: q.PaperDetailID,
+					CorrectAnswer: answer,
+					Level:         q.Level,
+				})
+			}
+		}
+
+		sort.Slice(candidates, func(i, j int) bool {
+			return candidates[i].Level > candidates[j].Level
+		})
+
+		changedCount := 0
+		for i := 0; i < numToMakeIncorrect && i < len(candidates); i++ {
+			candidate := candidates[i]
+
+			var wrongAnswer string
+			switch candidate.CorrectAnswer {
+			case "A":
+				wrongAnswer = "B"
+			case "B":
+				wrongAnswer = "C"
+			case "C":
+				wrongAnswer = "D"
+			case "D":
+				wrongAnswer = "A"
+			default:
+				options := []string{"A", "B", "C", "D"}
+				wrongAnswer = options[rand.Intn(len(options))]
+			}
+
+			finalAnswers[candidate.PaperDetailID] = wrongAnswer
+			changedCount++
+			// log.Printf("[CorrectnessControl] 已将题目 (ID: %s, 难度: %d) 的答案从 %s 修改为 %s。", candidate.PaperDetailID, candidate.Level, candidate.CorrectAnswer, wrongAnswer)
+		}
+		log.Printf("[CorrectnessControl] 共成功修改了 %d 道题的答案。", changedCount)
 	}
 
 	submissionList := make([]model.AnswerInput, len(paper.List))

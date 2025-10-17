@@ -118,7 +118,7 @@ func (s *AIService) BatchGetAnswersFromAI(questions []model.Question) ([]string,
 	}
 
 	payloadBytes, _ := json.Marshal(payload)
-	log.Printf("--- Sending SINGLE request to AI ---\n%s\n--------------------------------------\n", string(payloadBytes))
+	log.Printf("--- Sending SINGLE request to AI ---\n")
 	req, _ := http.NewRequest("POST", s.BaseURL+"/chat/completions", bytes.NewBuffer(payloadBytes))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+s.APIKey)

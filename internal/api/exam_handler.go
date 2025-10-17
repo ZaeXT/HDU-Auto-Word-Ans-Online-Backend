@@ -12,9 +12,10 @@ import (
 )
 
 type StartTestRequest struct {
-	Week               int `json:"week"`
-	ExamType           int `json:"exam_type"` // 0:自测 1:考试
-	SubmitDelaySeconds int `json:"submit_delay_seconds"`
+	Week               int  `json:"week"`
+	ExamType           int  `json:"exam_type"` // 0:自测 1:考试
+	SubmitDelaySeconds int  `json:"submit_delay_seconds"`
+	CorrectCount       *int `json:"correct_count"`
 }
 
 type LoginAndStartRequest struct {
@@ -23,6 +24,7 @@ type LoginAndStartRequest struct {
 	Week               int    `json:"week"`
 	ExamType           int    `json:"exam_type"` // 0:自测 1:考试
 	SubmitDelaySeconds int    `json:"submit_delay_seconds"`
+	CorrectCount       *int   `json:"correct_count"`
 }
 
 type ExamHandler struct {
@@ -55,6 +57,12 @@ func (h *ExamHandler) StartTestHandler(c *gin.Context) {
 	}
 
 	_ = c.ShouldBindJSON(&req)
+
+	correctCount := -1
+	if req.CorrectCount != nil {
+		correctCount = *req.CorrectCount
+	}
+
 	week := req.Week
 	if week == 0 {
 		fmt.Println("用户未提供周数，正在自动获取当前周数...")
@@ -70,7 +78,7 @@ func (h *ExamHandler) StartTestHandler(c *gin.Context) {
 		fmt.Printf("自动获取成功，当前周数: %d\n", week)
 	}
 
-	result, err := h.examService.ProcessTest(XAuthToken, req.SubmitDelaySeconds, week, req.ExamType)
+	result, err := h.examService.ProcessTest(XAuthToken, req.SubmitDelaySeconds, week, req.ExamType, correctCount)
 
 	if err != nil {
 		h.handleProcessTestError(c, err, "处理测试失败")
@@ -110,7 +118,7 @@ func (h *ExamHandler) LoginAndStartTestHandler(c *gin.Context) {
 		fmt.Printf("自动获取成功，当前周数: %d\n", week)
 	}
 
-	result, err := h.examService.ProcessTest(xAuthToken, req.SubmitDelaySeconds, week, req.ExamType)
+	result, err := h.examService.ProcessTest(xAuthToken, req.SubmitDelaySeconds, week, req.ExamType, *req.CorrectCount)
 	if err != nil {
 		h.handleProcessTestError(c, err, "处理测试失败 (登录成功后)")
 		return

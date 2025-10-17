@@ -12,6 +12,7 @@ type Question struct {
 	AnswerB       string `json:"answerB"`
 	AnswerC       string `json:"answerC"`
 	AnswerD       string `json:"answerD"`
+	Level         int    `json:"level"`
 }
 
 type SubmissionPayload struct {
