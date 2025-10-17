@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -19,12 +20,19 @@ func main() {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("./config")
 	viper.AddConfigPath(".")
+	viper.SetEnvPrefix("HDU_APP")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("读取配置文件失败: %s", err)
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Println("警告：未找到 config.yaml 文件，将完全依赖环境变量进行配置。")
+		} else {
+			log.Fatalf("读取配置文件失败: %s", err)
+		}
 	}
 	jsonPath := viper.GetString("database.json_path")
 	if _, err := os.Stat(jsonPath); os.IsNotExist(err) {
-		log.Fatalf("题库文件不存在: %s. 请先运行Python转换脚本。", jsonPath)
+		log.Fatalf("基础题库文件不存在: %s. 请确保它被正确打包到镜像或位于工作目录。", jsonPath)
 	}
 	wordRepo, err := repository.NewWordRepository(jsonPath)
 	if err != nil {
@@ -39,9 +47,10 @@ func main() {
 
 	hduClient := client.NewHduApiClient(viper.GetString("hdu_api.base_url"), viper.GetInt("hdu_api.timeout_seconds"))
 	aiService := service.NewAIService(
-		viper.GetString("deepseek_ai.base_url"),
-		viper.GetString("deepseek_ai.api_key"),
-		viper.GetInt("deepseek_ai.timeout_seconds"),
+		viper.GetString("ai_service.base_url"),
+		viper.GetString("ai_service.api_key"),
+		viper.GetString("ai_service.model"),
+		viper.GetInt("ai_service.timeout_seconds"),
 	)
 
 	authService, err := auth.NewAuthService()

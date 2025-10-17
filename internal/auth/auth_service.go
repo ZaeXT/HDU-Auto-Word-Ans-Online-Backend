@@ -46,10 +46,10 @@ func (s *AuthService) Login(username, password string) (string, error) {
 		return "", fmt.Errorf("生成 state token 失败: %w", err)
 	}
 
-	log.Println("步骤 0: 已生成 State Token:", stateToken)
+	log.Println("已生成 State Token:", stateToken)
 	serviceURLWithState := fmt.Sprintf("%s?state=%s&index=", baseServiceURL, stateToken)
 
-	log.Println("步骤 1 & 2: 访问登录页并解析令牌...")
+	// log.Println("步骤 1 & 2: 访问登录页并解析令牌...")
 	croyptoKey, execution, fullLoginURL, err := s.fetLoginTokens(isolatedClient, serviceURLWithState)
 	if err != nil {
 		return "", err
@@ -57,25 +57,25 @@ func (s *AuthService) Login(username, password string) (string, error) {
 
 	log.Printf("    - AES Key: %s, Execution Token (前20): %s...\n", croyptoKey, execution[:20])
 
-	log.Println("步骤 3: 加密密码...")
+	// log.Println("步骤 3: 加密密码...")
 	encryptedPassword, err := s.encryptPassword(croyptoKey, password)
 	if err != nil {
 		return "", err
 	}
-	log.Println("    - 密码加密成功")
+	// log.Println("    - 密码加密成功")
 
-	log.Println("步骤 4 & 5: 发送登录请求...")
+	// log.Println("步骤 4 & 5: 发送登录请求...")
 	ticketURL, err := s.postLoginForm(isolatedClient, username, encryptedPassword, croyptoKey, execution, fullLoginURL)
 	if err != nil {
 		return "", err
 	}
-	log.Println("    - 登录成功，已获取Ticket URL")
-	log.Println("步骤 6: 访问Ticket URL换取X-Auth-Token...")
+	// log.Println("    - 登录成功，已获取Ticket URL")
+	// log.Println("步骤 6: 访问Ticket URL换取X-Auth-Token...")
 	xAuthToken, err := s.exchangeTicketForToken(isolatedClient, ticketURL, fullLoginURL)
 	if err != nil {
 		return "", err
 	}
-	log.Println("🎉🎉🎉 最终胜利！成功获取 X-Auth-Token！ 🎉🎉🎉")
+	// log.Println("🎉🎉🎉 最终胜利！成功获取 X-Auth-Token！ 🎉🎉🎉")
 	return xAuthToken, nil
 }
 

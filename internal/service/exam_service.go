@@ -201,7 +201,7 @@ func (s *ExamService) ProcessTest(xAuthToken string, delaySeconds int, week int,
 	}
 	fmt.Println("测试请求处理成功！")
 	go s.learnFromTestResult(xAuthToken, paper.PaperID)
-	return fmt.Sprintf("自动化测试成功完成并提交！题库命中 %d, AI成功处理 %d。", dbHitCount, aiSolvedCount), nil
+	return fmt.Sprintf("自动化测试成功完成并提交！答案库命中 %d, 题库命中 %d, AI成功处理 %d。", bankHitCount, dbHitCount, aiSolvedCount), nil
 }
 
 func (s *ExamService) learnFromTestResult(xAuthToken, paperID string) {
@@ -218,7 +218,7 @@ func (s *ExamService) learnFromTestResult(xAuthToken, paperID string) {
 		log.Printf("[Learn] 学习协程异常退出 (PaperID: %s)", paperID)
 		return
 	}
-	log.Printf("[Learn] 成功获取试卷详情，共 %d 道题。", len(detail.List))
+	// log.Printf("[Learn] 成功获取试卷详情，共 %d 道题。", len(detail.List))
 
 	newAnswersToSave := make(map[string]string)
 	for _, item := range detail.List {
@@ -232,7 +232,7 @@ func (s *ExamService) learnFromTestResult(xAuthToken, paperID string) {
 		fingerprint := generateQuestionFingerprint(q)
 		newAnswersToSave[fingerprint] = item.Answer
 	}
-	log.Printf("[Learn] 已从详情中提取 %d 条答案准备存入银行。", len(newAnswersToSave))
+	// log.Printf("[Learn] 已从详情中提取 %d 条答案准备存入银行。", len(newAnswersToSave))
 
 	if err := s.answerBankRepo.Save(newAnswersToSave); err != nil {
 		log.Printf("!!! 致命错误 (考后学习): 保存到答案银行时出错: %v", err)

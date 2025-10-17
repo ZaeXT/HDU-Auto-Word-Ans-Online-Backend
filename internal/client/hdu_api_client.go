@@ -64,7 +64,7 @@ func (C *HduApiClient) FetchCurrentWeek(xAuthToken string) (*model.CourseInfoRes
 	req.Header.Set("Cache-Control", "no-cache")
 	req.Header.Set("Pragma", "no-cache")
 
-	logRequest(req, "Fetch Current Week")
+	// logRequest(req, "Fetch Current Week")
 
 	resp, err := C.HTTPClient.Do(req)
 	if err != nil {
@@ -96,7 +96,7 @@ func (c *HduApiClient) FetchPaperDetail(xAuthToken, paperID string) (*model.Pape
 	req.Header.Set("Cache-Control", "no-cache")
 	req.Header.Set("Pragma", "no-cache")
 
-	logRequest(req, "Fetch Paper Detail")
+	// logRequest(req, "Fetch Paper Detail")
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		var netErr net.Error
@@ -139,7 +139,7 @@ func (c *HduApiClient) GetNewPaper(xAuthToken string, week int, examType string)
 	req, _ := http.NewRequest("GET", url, nil)
 	setCommonHeaders(req, xAuthToken, sklTicket)
 
-	logRequest(req, "Get New Paper")
+	// logRequest(req, "Get New Paper")
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
@@ -181,7 +181,7 @@ func (c *HduApiClient) SubmitPaper(xAuthToken string, payload *model.SubmissionP
 	setCommonHeaders(req, xAuthToken, sklTicket)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Origin", "https://skl.hdu.edu.cn")
-	logRequest(req, "Submit Paper")
+	// logRequest(req, "Submit Paper")
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return err

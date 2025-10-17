@@ -36,11 +36,11 @@ func NewAnswerBankRepository(filePath string) (*AnswerBankRepository, error) {
 }
 
 func (r *AnswerBankRepository) load() error {
-	log.Println("[AnswerBank] 正在尝试加锁 (读取) 并加载文件...")
+	// log.Println("[AnswerBank] 正在尝试加锁 (读取) 并加载文件...")
 	r.mu.Lock()
 	defer func() {
 		r.mu.Unlock()
-		log.Println("[AnswerBank] 解锁 (读取) 完成。")
+		// log.Println("[AnswerBank] 解锁 (读取) 完成。")
 	}()
 
 	byteValue, err := os.ReadFile(r.filePath)
@@ -65,7 +65,7 @@ func (r *AnswerBankRepository) load() error {
 }
 
 func (r *AnswerBankRepository) persist() error {
-	log.Println("[AnswerBank] 正在尝试加锁 (写入) 并持久化文件...")
+	// log.Println("[AnswerBank] 正在尝试加锁 (写入) 并持久化文件...")
 	byteValue, err := json.MarshalIndent(r.bank, "", "  ")
 	if err != nil {
 		log.Printf("[AnswerBank] 持久化失败: 序列化JSON错误: %v", err)
@@ -90,13 +90,13 @@ func (r *AnswerBankRepository) Query(fingerprint string) (string, bool) {
 }
 
 func (r *AnswerBankRepository) Save(newAnswers map[string]string) error {
-	log.Println("[AnswerBank] 收到保存新答案的请求...")
+	// log.Println("[AnswerBank] 收到保存新答案的请求...")
 	r.mu.Lock()
 	defer func() {
 		r.mu.Unlock()
-		log.Println("[AnswerBank] 解锁 (写入) 完成。")
+		// log.Println("[AnswerBank] 解锁 (写入) 完成。")
 	}()
-	log.Println("[AnswerBank] 已获取写锁。")
+	// log.Println("[AnswerBank] 已获取写锁。")
 
 	addedCount := 0
 	for fingerprint, answer := range newAnswers {

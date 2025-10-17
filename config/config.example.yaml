@@ -5,9 +5,10 @@ hdu_api:
   base_url: "https://skl.hdu.edu.cn/api"
   timeout_seconds: 60
 
-deepseek_ai:
+ai_service:
   api_key: "sk-*****" 
   base_url: "https://api.deepseek.com"
+  model: "deepseek-chat"
   timeout_seconds: 120
 
 database:

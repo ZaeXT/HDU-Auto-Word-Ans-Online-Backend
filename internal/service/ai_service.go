@@ -16,13 +16,15 @@ import (
 type AIService struct {
 	BaseURL    string
 	APIKey     string
+	Model      string
 	HttpClient *http.Client
 }
 
-func NewAIService(baseURL, apiKey string, timeoutSec int) *AIService {
+func NewAIService(baseURL, apiKey, model string, timeoutSec int) *AIService {
 	return &AIService{
 		BaseURL: baseURL,
 		APIKey:  apiKey,
+		Model:   model,
 		HttpClient: &http.Client{
 			Timeout: time.Duration(timeoutSec) * time.Second,
 		},
@@ -51,7 +53,7 @@ D. %s`,
 	}
 
 	payload := model.AIChatRequest{
-		Model: "deepseek-chat",
+		Model: s.Model,
 		Messages: []model.Message{
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: prompt},
@@ -59,7 +61,7 @@ D. %s`,
 	}
 
 	payloadBytes, err := json.Marshal(payload)
-	log.Printf("--- Sending SINGLE request to AI ---\n%s\n--------------------------------------\n", string(payloadBytes))
+	log.Printf("--- Sending SINGLE request to AI ---\n")
 
 	req, _ := http.NewRequest("POST", s.BaseURL+"/chat/completions", bytes.NewBuffer(payloadBytes))
 	req.Header.Set("Content-Type", "application/json")
@@ -108,7 +110,7 @@ func (s *AIService) BatchGetAnswersFromAI(questions []model.Question) ([]string,
 	systemPrompt := "你是一个高效的英语词义匹配助手，你需要根据指令批量处理问题并严格按顺序、按指定格式返回结果。"
 
 	payload := model.AIChatRequest{
-		Model: "deepseek-chat",
+		Model: s.Model,
 		Messages: []model.Message{
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: promptBuilder.String()},
