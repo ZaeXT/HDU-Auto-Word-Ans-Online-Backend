@@ -15,14 +15,13 @@ func SetupRouter(examHandler *api.ExamHandler, allowedOrigins []string) *gin.Eng
 	config.AllowHeaders = append(config.AllowHeaders, "X-Auth-Token", "Content-Type")
 	r.Use(cors.New(config))
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "UP"})
-	})
-
 	apiV1 := r.Group("/api/v1")
 	{
 		apiV1.POST("/start-test", examHandler.StartTestHandler)
 		apiV1.POST("/login-and-start", examHandler.LoginAndStartTestHandler)
+		apiV1.GET("/health", func(c *gin.Context) {
+			c.JSON(200, gin.H{"status": "UP"})
+		})
 	}
 
 	return r

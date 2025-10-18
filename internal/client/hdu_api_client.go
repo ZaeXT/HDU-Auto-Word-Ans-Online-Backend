@@ -46,7 +46,7 @@ func setCommonHeaders(req *http.Request, xAuthToken, sklTicket string) {
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7")
 	req.Header.Set("Connection", "keep-alive")
 	req.Header.Set("Referer", "https://skl.hdu.edu.cn/")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Linux; U; Android 12; zh-CN; M2102J2SC Build/SKQ1.211006.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/69.0.3497.100 UWS/3.22.1.210 Mobile Safari/537.36 AliApp(DingTalk/6.5.20) com.alibaba.android.rimet/24646881 Channel/700159 language/zh-CN abi/64 UT4Aplus/0.2.25 colorScheme/light")
 	req.Header.Set("X-Auth-Token", xAuthToken)
 	req.Header.Set("skl-ticket", sklTicket)
 }
