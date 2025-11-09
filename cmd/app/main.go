@@ -1,6 +1,7 @@
 package main
 
 import (
+	"HDU-Auto-Word-Ans-Online-Backend/config"
 	"HDU-Auto-Word-Ans-Online-Backend/internal/api"
 	"HDU-Auto-Word-Ans-Online-Backend/internal/auth"
 	"HDU-Auto-Word-Ans-Online-Backend/internal/client"
@@ -56,6 +57,12 @@ func main() {
 	authService, err := auth.NewAuthService()
 	if err != nil {
 		log.Fatalf("初始化认证服务失败: %s", err)
+	}
+
+	// 将配置文件中的 whitelist.users 暴露为全局变量（需在文件顶部声明：var WhitelistUsers []string）
+	config.WhitelistUsers = viper.GetStringSlice("whitelist.users")
+	if len(config.WhitelistUsers) == 0 {
+		log.Println("警告：whitelist.users 为空或未配置。")
 	}
 
 	examService := service.NewExamService(hduClient, aiService, wordRepo, answerBankRepo)

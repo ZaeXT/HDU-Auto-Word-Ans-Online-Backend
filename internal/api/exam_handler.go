@@ -1,12 +1,14 @@
 package api
 
 import (
+	"HDU-Auto-Word-Ans-Online-Backend/config"
 	"HDU-Auto-Word-Ans-Online-Backend/internal/auth"
 	"HDU-Auto-Word-Ans-Online-Backend/internal/client"
 	"HDU-Auto-Word-Ans-Online-Backend/internal/service"
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -93,7 +95,23 @@ func (h *ExamHandler) LoginAndStartTestHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效: " + err.Error()})
 		return
 	}
+	// 白名单判断（可改为从配置或环境变量加载名单）
+	allowed := false
+	for _, u := range config.WhitelistUsers {
+		if strings.EqualFold(u, req.Username) {
+			allowed = true
+			break
+		}
+	}
+	if !allowed {
+		c.JSON(http.StatusForbidden, gin.H{"error": "该用户不在白名单内，无法使用测试功能"})
+		return
+	}
 
+	if req.SubmitDelaySeconds <= 300 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "提交延迟时间过短，至少应为300秒以上"})
+		return
+	}
 	xAuthToken, err := h.authService.Login(req.Username, req.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
